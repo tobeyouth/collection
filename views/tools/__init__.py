@@ -16,16 +16,18 @@ def init_urls(app, urls):
         else:
             api.add_resource(k, v)
 
-    api.representations.update({
-        'application/json': custom_json_output
-    })
+    # api.representations.update({
+    #     'application/json': custom_json_output
+    # })
 
 
 class CustomEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, decimal.Decimal):
             return str(obj)
-        return json.JSONEncoder.default(self, obj)
+        elif isinstance(obj, dict):
+            return json.JSONEncoder.default(self, obj)
+        return obj
 
 
 def custom_json_output(data, code, headers=None):

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from flask import request
+import json
+from flask import request, make_response
 from .reqparse import RequestParser
 from functools import wraps
 
@@ -17,3 +18,19 @@ def arguments(schema):
 
         return _
     return decorator
+
+def convert_data(func):
+    @wraps(func)
+    def _wrap(instance, request, *args, **kwargs):
+        r = func(instance, request, *args, **kwargs)
+        
+        data_type = request.headers.get('Content-Type')
+        if not data_type:
+            data_type = 'application/json'
+        if 'xml' in data_type:
+            response = make_response(r)
+            response.headers['Content-Type'] = 'text/xml'
+            return response
+        else:
+            return json.dumped(r)
+    return _wrap

@@ -36,10 +36,8 @@ class RequestMiddleware(object):
 
     def __call__(self, environ, start_response):
         ctx = self.app.im_self.request_context(environ)
-
         environ['is_weixin'] = is_weixin(ctx.request)
         environ['is_mobile'] = is_mobile(ctx.request)
-
         return self.app(environ, start_response)
 
 class ApiResource(Resource):

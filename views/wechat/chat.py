@@ -4,7 +4,7 @@ import os
 
 from flask import abort
 from libs.middlewares import ApiResource
-from libs.decorators import arguments
+from libs.decorators import arguments, convert_data
 from wechatpy.utils import check_signature
 from wechatpy import parse_message, create_reply
 from wechatpy.exceptions import (
@@ -21,6 +21,7 @@ WECHAT_AES_KEY = os.environ['WECHAT_AES_KEY']
 
 class ChatApi(ApiResource):
 
+    @convert_data
     @arguments({
         'signature': {'type': str},
         'timestamp': {'type': str},
@@ -35,12 +36,12 @@ class ChatApi(ApiResource):
         encrypt_type = request.req_args.get('encrypt_type', 'raw')
         msg_signature = request.req_args.get('msg_signature', '')
 
+
         try:
             check_signature(WECHAT_TOKEN, signature, timestamp, nonce)
-        except InvalidSignatureException:
+        except InvalidSignatureException as e:
+            print e
             abort(403)
-
-        msg = parse_message(request.data)
 
         # plaintext mode
         if encrypt_type == 'raw':
@@ -48,6 +49,7 @@ class ChatApi(ApiResource):
                 reply = create_reply(msg.content, msg)
             else:
                 reply = create_reply('Hi!', msg)
+            return reply.render()
         else:
             from wechatpy.crypto import WeChatCrypto
             crypto = WeChatCrypto(WECHAT_TOKEN, WECHAT_AES_KEY, WECHAT_APP_ID)
@@ -70,4 +72,3 @@ class ChatApi(ApiResource):
                     reply = create_reply('Sorry, can not handle this for now', msg)
                 return crypto.encrypt_message(reply.render(), nonce, timestamp)
 
-        return dict(r=0)
