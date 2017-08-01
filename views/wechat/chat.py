@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*
+# -*- coding: utf-8 -*-
 
 import os
 
@@ -11,6 +11,7 @@ from wechatpy.exceptions import (
     InvalidSignatureException,
     InvalidAppIdException,
 )
+from models.log import Log
 
 
 WECHAT_TOKEN = os.environ['WECHAT_TOKEN']
@@ -20,6 +21,17 @@ WECHAT_AES_KEY = os.environ['WECHAT_AES_KEY']
 
 
 class ChatApi(ApiResource):
+    
+    @convert_data
+    @arguments({
+        'signature': {'type': str},
+        'timestamp': {'type': str},
+        'nonce': {'type': str},
+        'echostr': {'type': str}
+    })
+    def get(self, request):
+        echostr = request.req_args.get('echostr')
+        return str(echostr)
 
     @convert_data
     @arguments({
@@ -35,12 +47,10 @@ class ChatApi(ApiResource):
         nonce = request.req_args.get('nonce', '')
         encrypt_type = request.req_args.get('encrypt_type', 'raw')
         msg_signature = request.req_args.get('msg_signature', '')
-
-
+        
         try:
             check_signature(WECHAT_TOKEN, signature, timestamp, nonce)
         except InvalidSignatureException as e:
-            print e
             abort(403)
 
         # plaintext mode

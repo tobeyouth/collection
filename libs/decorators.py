@@ -25,12 +25,17 @@ def convert_data(func):
         r = func(instance, request, *args, **kwargs)
         
         data_type = request.headers.get('Content-Type')
+        
         if not data_type:
-            data_type = 'application/json'
+            data_type = 'text/html; charset=utf-8'
+            # data_type = 'text/plain;'
         if 'xml' in data_type:
             response = make_response(r)
             response.headers['Content-Type'] = 'text/xml'
             return response
         else:
-            return json.dumped(r)
+            response = make_response(r)
+            response.headers['Content-Type'] = data_type
+            return response
+
     return _wrap
