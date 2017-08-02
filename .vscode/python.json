@@ -1,0 +1,6 @@
+{
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.renderWhitespace": "all",
+    "workbench.colorTheme": "Visual Studio Dark"
+}
